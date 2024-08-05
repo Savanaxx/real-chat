@@ -24,16 +24,29 @@ const registerUser = async (req, res, next) => {
         res.sendFile(path.join(__dirname, '../../public/html/register.html'));
     }
     catch (err) {
-        next(err)
+        next(err);
     }
 }
 
 const registeredUser = async (req, res, next) => {
     try {
         const { username, password, email } = req.body;
-        const newUser = new User({ username, password, email });
-        await newUser.save();
-        res.redirect('/')
+
+        const isUserExist = await isUser.getUser(username);
+        const isEmailExist = await isUser.getEmail(email);
+
+        if (isUserExist) {
+            req.session.failedLog = true;
+            res.redirect('/registerFailedU');
+        } else if (isEmailExist) {
+            req.session.failedLog = true;
+            res.redirect('/registerFailedM');
+        } else {
+            const newUser = new User({ username, password, email });
+            await newUser.save();
+            req.session.regSuc = true;
+            res.redirect('/success');
+        }
     } catch (err) {
         next(err);
     }
@@ -42,7 +55,7 @@ const registeredUser = async (req, res, next) => {
 const login = async (req, res, next) => {
     const { username, password } = req.body;
     try {
-        const isUserExist = await isUser(username);
+        const isUserExist = await isUser.getUser(username);
         if (!isUserExist) {
             req.session.failedLog = true;
             res.redirect('/loginUserNotFound');
@@ -70,9 +83,40 @@ const loginUserNotFound = async (req, res, next) => {
         req.session.failedLog = false;
     }
     catch (err) {
-        next(err)
+        next(err);
     }
 }
 
-module.exports = { homeGET, testError, registerUser, registeredUser, login, loginUserNotFound };
+const registeredFailedU = async (req, res, next) => {
+    try {
+        req.session.failedLog = false;
+        res.sendFile(path.join(__dirname, '../../public/html/registerFailedU.html'));
+    }
+    catch (err) {
+        next(err);
+    }
+}
+
+
+const registeredFailedM = async (req, res, next) => {
+    try {
+        req.session.failedLog = false;
+        res.sendFile(path.join(__dirname, '../../public/html/registerFailedM.html'));
+    }
+    catch (err) {
+        next(err);
+    }
+}
+
+const success = async (req, res, next) => {
+    try {
+        req.session.regSuc = false;
+        res.sendFile(path.join(__dirname, '../../public/html/registerSuccess.html'));
+    }
+    catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { homeGET, testError, registerUser, registeredUser, login, loginUserNotFound, registeredFailedU, registeredFailedM, success };
 

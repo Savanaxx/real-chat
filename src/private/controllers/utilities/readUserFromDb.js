@@ -4,8 +4,11 @@ const User = require(path.join(__dirname, '../models/user'));
 
 //reading users data from db
 const getUser = async (username) => {
-    const user = await User.findOne({ username });
-    return user
+    return await User.findOne({ username });
 }
 
-module.exports = getUser;
+const getEmail = async (email) => {
+    return await User.findOne({ email });
+}
+
+module.exports = { getUser, getEmail };

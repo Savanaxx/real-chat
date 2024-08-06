@@ -65,6 +65,15 @@ const registeredUser = async (req, res, next) => {
     }
 }
 
+const mainGET = async (req, res, next) => {
+    try {
+        res.sendFile(path.join(__dirname, '../../public/html/main.html'));
+    }
+    catch (err) {
+        next(err);
+    }
+}
+
 const login = async (req, res, next) => {
     const { username, password } = req.body;
     try {
@@ -76,6 +85,7 @@ const login = async (req, res, next) => {
         else {
             const isMatch = await bcrypt.compare(password, isUserExist.password);
             if (isMatch) {
+                req.session.logged = true;
                 res.redirect('/main');
             }
             else {
@@ -132,5 +142,5 @@ const success = async (req, res, next) => {
     }
 }
 
-module.exports = { homeGET, testError, registerUser, registeredUser, login, loginUserNotFound, registeredFailedU, registeredFailedM, success };
+module.exports = { homeGET, testError, registerUser, registeredUser, login, loginUserNotFound, registeredFailedU, registeredFailedM, success, mainGET };
 

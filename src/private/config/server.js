@@ -7,14 +7,14 @@ const app = express();
 const port = 3000;
 const apiRouter = require(path.join(__dirname, '../controllers/routers/apiRouter'))
 const errorHandler = require(path.join(__dirname, '../controllers/middleware/errorHandlerer'))
-const notFoundHandlerer = require(path.join(__dirname, '../controllers/middleware/notFound'))
+const notFoundHandlerer = require(path.join(__dirname, '../controllers/middleware/notFoundHandlerer'))
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //session
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'ac7b827f91f3c30baf78bb278ef7c188',
     resave: false,
     saveUninitialized: true
 }));

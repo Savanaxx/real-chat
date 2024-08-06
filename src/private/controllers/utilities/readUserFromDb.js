@@ -11,4 +11,7 @@ const getEmail = async (email) => {
     return await User.findOne({ email });
 }
 
-module.exports = { getUser, getEmail };
+const getIdRef = async (idReference) => {
+    return await User.findOne({ idReference })
+}
+module.exports = { getUser, getEmail, getIdRef };

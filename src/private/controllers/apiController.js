@@ -29,20 +29,33 @@ const registerUser = async (req, res, next) => {
 }
 
 const registeredUser = async (req, res, next) => {
+    let idReference = Math.trunc(Math.random() * 4000 + 1);
     try {
         const { username, password, email } = req.body;
-
+        const nick = username;
         const isUserExist = await isUser.getUser(username);
         const isEmailExist = await isUser.getEmail(email);
+        let isIdReferenceUsed = await isUser.getIdRef(idReference);
 
         if (isUserExist) {
-            req.session.failedLog = true;
+            req.session.failedReg = true;
             res.redirect('/registerFailedU');
         } else if (isEmailExist) {
-            req.session.failedLog = true;
+            req.session.failedReg = true;
             res.redirect('/registerFailedM');
-        } else {
-            const newUser = new User({ username, password, email });
+        }
+        else if (isIdReferenceUsed) {
+            while (isIdReferenceUsed) {
+                idReference = Math.trunc(Math.random() * 4000 + 1);
+                isIdReferenceUsed = await isUser.getIdRef(idReference);
+            }
+            const newUser = new User({ username, password, email, nick, idReference });
+            await newUser.save();
+            req.session.regSuc = true;
+            res.redirect('/success');
+        }
+        else {
+            const newUser = new User({ username, password, email, nick, idReference });
             await newUser.save();
             req.session.regSuc = true;
             res.redirect('/success');
@@ -89,8 +102,9 @@ const loginUserNotFound = async (req, res, next) => {
 
 const registeredFailedU = async (req, res, next) => {
     try {
-        req.session.failedLog = false;
         res.sendFile(path.join(__dirname, '../../public/html/registerFailedU.html'));
+        req.session.failedReg = false;
+
     }
     catch (err) {
         next(err);
@@ -100,8 +114,8 @@ const registeredFailedU = async (req, res, next) => {
 
 const registeredFailedM = async (req, res, next) => {
     try {
-        req.session.failedLog = false;
         res.sendFile(path.join(__dirname, '../../public/html/registerFailedM.html'));
+        req.session.failedReg = false;
     }
     catch (err) {
         next(err);
@@ -110,8 +124,8 @@ const registeredFailedM = async (req, res, next) => {
 
 const success = async (req, res, next) => {
     try {
-        req.session.regSuc = false;
         res.sendFile(path.join(__dirname, '../../public/html/registerSuccess.html'));
+        req.session.regSuc = false;
     }
     catch (err) {
         next(err);
